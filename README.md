@@ -41,7 +41,7 @@ python tools/evaluate.py --queries data/prefix_queries.csv --output reports/eval
 All store names are anonymized as `Store A…F` and product URLs/prices are fictional. Please do not add real merchant identifiers before sharing the assignment publicly.
 
 ## Candidate workflow
-1. Прочитайте `assignment/PREFIX_TEST_ASSIGNMENT.md` и `docs/CANDIDATE_DELIVERY_GUIDE.md`.
+1. Прочитайте `assignment/PREFIX_TEST_ASSIGNMENT.md`.
 2. Импортируйте каталог и запросы в выбранный вами движок поиска.
 3. Реализуйте поддержку коротких префиксов, опечаток, транслитерации и числовых атрибутов.
 4. Используйте `tools/evaluate.py` как каркас для отчёта и дополните README результатами.
@@ -49,6 +49,8 @@ All store names are anonymized as `Store A…F` and product URLs/prices are fict
 6. Дайте доступ на просмотр решения (репозиторий и артефакты) адресу `artem.kruglov@diginetica.com`.
 
 ## Maintainer notes
-- Все артефакты из внутреннего расследования находятся в `docs/` и `data/` (см. суффиксы `20251027`).
 - Если нужно обновить статистику whitelist, положите новые выгрузки в `data/` и ссылку добавьте в README.
 - Перед публикацией убедитесь, что новые файлы не содержат PII или названий реальных магазинов.
+
+## Leaderboard
+Сводную таблицу с прогрессом кандидатов см. в [`LEADERBOARD.md`](LEADERBOARD.md). Сейчас лидер показывает покрытие 86 % (52/60 релевантных запросов) с общим временем выполнения 15:39.
