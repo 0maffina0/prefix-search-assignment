@@ -1,0 +1,61 @@
+query,site,type,notes
+ма,Store A,open,Mobile keystroke for butter/oil
+йогурт гр,Store A,open,Partial multi-word
+bon pa,Store A,open,Foreign brand transliteration
+холс,Store B,open,Brand typed in Cyrillic
+крем для рук,Store B,open,Full phrase but should tolerate prefixes
+масло раст 10л,Store C,open,B2B volume intent
+кар тофель,Store D,open,Broken spacing
+xfq,Store E,open,Wrong keyboard layout for чай
+adapter usb c,Store E,open,English technical query
+pr,Store F,open,Wine prefix (prosecco/premium)
+riesling mos,Store F,open,Region-specific wine
+памперсы 3,Store D,open,Size constraint
+масло сл,Store A,open,Two-letter stop
+филе инд,Store A,open,Protein intent
+teos,Store A,open,Brand prefix
+греч не,Store C,open,Cyrillic split
+prosecco ro,Store F,open,Latin multi-word
+джин то,Store F,open,Cocktail ingredient
+хозяйст мыло,Store D,open,Household goods
+power bank 20,Store E,open,Numeric suffix
+сыр гауда,Store C,open,Category + brand
+diap night,Store D,open,Latin shortcut for diapers
+cat adult,Store C,open,Pet food intent
+dog hypo,Store C,open,Hypoallergenic dog food
+san pelle,Store F,open,Sparkling water brand
+посуд моющ,Store D,open,Abbreviated dish soap
+лампа led е27,Store E,open,Mixed alphabet technical
+мешки 120л,Store D,open,Trash bags with volume
+круп греч,Store C,open,Abbreviated grocery
+рыба фил,Store B,open,Frozen fish block
+йогурт греческий,Store A,hidden,Full word should still trigger prefix analyzer
+lay chips,Store B,hidden,English brand typed loosely
+масло сливочное крестьян,Store D,hidden,Long tail prefix
+санпел,Store F,hidden,Aggressive truncation
+xfqyfz сервиз,Store E,hidden,Mixed layout + second word
+cheddar 5kg,Store C,hidden,B2B cheese
+fris cat adult,Store C,hidden,Pet food brand
+прокладки ночные,Store D,hidden,Hygiene category
+масло растительное horeca,Store C,hidden,Industry keyword
+филе индейки 5кг,Store A,hidden,Bulk poultry
+памперсы размер 3 night,Store D,hidden,Mixed language
+adapter type c gan,Store E,hidden,Technical spec
+power bank wireless,Store E,hidden,Accessory variant
+riesling mosel 1.5l,Store F,hidden,Numeric suffix
+prosc ros,Store F,hidden,Severely truncated
+джин гараж грейп,Store F,hidden,Cyrillic spelling of foreign brand
+витамины иммунитет,Store B,hidden,Health vertical
+маска для волос ker,Store B,hidden,Mixed Latin/Cyrillic
+лампа led smart,Store E,hidden,Smart home variant
+trash bags 30l,Store D,hidden,English units
+cle an dish,Store D,hidden,Spacing noise
+гель для душа sensitive,Store B,hidden,Mixed languages
+puree mango,Store D,hidden,Baby food in Latin
+cat indoor steril,Store C,hidden,Foreign descriptor
+dog hypo salmon,Store C,hidden,Attribute-rich
+energy drink zero,Store E,hidden,English intent
+сахар меш 25,Store C,hidden,Numeric B2B
+teabag herbal detox,Store A,hidden,English tea
+сыр моцарелла 2 кг,Store C,hidden,Full words but should be in scope
+gloves nitrile m,Store D,hidden,Protective equipment
