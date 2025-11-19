@@ -1,60 +1,98 @@
-# Prefix Search Assignment Assets
+# Prefix Search Assignment
 
-This repository packages everything needed to run the "prefix-search ranking" test assignment:
+Поисковый сервис для префиксного поиска по каталогу 1000 товаров из `data/catalog_products.xml`.
 
-- synthetic catalog with 1 000 multilingual products (`data/catalog_products.xml`),
-- curated query set with 30 open and 30 hidden prefixes (`data/prefix_queries.csv`),
-- whitelist/quality exports from the production audit (see `data/*.csv` / `.json`),
-- investigative reports and spellchecker notes (`docs/`),
-- candidate-facing brief plus delivery instructions.
+Основной функционал сервиса:
 
-## Directory map
-| Path | Description |
-| --- | --- |
-| `assignment/PREFIX_TEST_ASSIGNMENT.md` | Основное описание задания (на русском). |
-| `docs/FINAL_COMPREHENSIVE_REPORT.md` | Итоговый отчёт по текущим проблемам префиксного поиска. |
-| `docs/PREFIX_SEARCH_SORT_ANALYSIS_20251027.md` | Детальный анализ сортировки по префиксам. |
-| `docs/PREFIX_SEARCH_REMEDIATION_PLAN.md` | План работ по улучшению поиска. |
-| `docs/PREFIX_WL_DEBUG_CHECK_20251027.md` | Замечания по whitelist-правилам. |
-| `docs/SPELLCHECKER_AUTOFILL_ANALYSIS.md` | Сравнение двух версий spellchecker/autofill. |
-| `docs/CANDIDATE_DELIVERY_GUIDE.md` | Инструкция для кандидатов (Docker + Git требования). |
-| `data/catalog_products.xml` | Каталог товаров (~1 000 SKU). |
-| `data/prefix_queries.csv` | 60 префиксных запросов (open/hidden). |
-| `data/PREFIX_*.{csv,json}` | Реальные метрики whitelist/zero-queries (анонимизированы). |
-| `reports/PREFIX_REPORT_20251027.html` | HTML-дашборд с графиками за 7 дней. |
-| `tools/generate_catalog.py` | Скрипт генерации каталога (детерминированный). |
-| `tools/load_catalog.py` | Быстрая проверка каталога (категории/бренды). |
-| `tools/evaluate.py` | Заготовка для собственного evaluation pipeline. |
-| `tools/manual_sample.py` | Съёмка 20 открытых запросов для ручной оценки. |
+- поднимает кластер `Elasticsearch` + API (FastAPI) через `docker-compose`;
+- при старте сам создаёт индекс `catalog_prefix` c нужным mapping и анализаторами;
+- импортирует `data/catalog_products.xml` в Elasticsearch;
+- реализует префиксный поиск с учётом:
+  - коротких префиксов (edge n-gram + `bool_prefix`);
+  - опечаток в раскладке;
+  - числовых признаков веса/объёма (`10л`, `5kg` и т.п.);
+  - «защиты от мусора» по категории (`category`-пурити);
+- содержит скрипт оценки качества и латентности `tools/run_evaluation.py`
+  (Precision@3 по категории + latency distribution).
 
-## Data refresh
+Эндпоинты:
+
+- `GET /health`
+  - Возвращает `{"status": "ok"}` после успешного создания индекса и загрузки каталога.
+- `GET /search`
+  - Параметры:
+    - `q` — строка запроса (обязательный, `min_length=1`),
+    - `top_k` — количество документов в ответе (по умолчанию 5, диапазон 1–50).
+  - Возвращает `SearchResponse` с:
+    - логами нормализации (`normalized_query`, `layout_fixed_query`),
+    - распознанным числовым фильтром (`numeric_filter`),
+    - top-N товарами (`results`).
+---
+
+## 1. Структура проекта
+
+app/
+  main.py                   # FastAPI-приложение, индекс, загрузка каталога, логика поиска
+
+data/
+  catalog_products.xml      # 1000 товаров (исходный каталог)
+  prefix_queries.csv        # 60 префиксных запросов (open + hidden)
+
+reports/
+  eval_results.csv          # результат проверки
+
+tools/
+  run_evaluation.py         # скрипт для прогона prefix_queries.csv через /search
+
+Dockerfile                  # контейнер с API (FastAPI + зависимости)
+docker-compose.yml          # поднимает Elasticsearch + API
+requirements.txt            # fastapi, uvicorn, elasticsearch
+
+
+## 2. Быстрый старт
+
+### Требования
+
+- **Docker** и **Docker Compose**
+- **Python 3.11+** 
+
+Из корня проекта:
+
 ```bash
-# regenerate the synthetic catalog (1 000 rows by default)
-python tools/generate_catalog.py --output data/catalog_products.xml --total 1000 --seed 42
-
-# take a quick look at category/brand distribution
-python tools/load_catalog.py data/catalog_products.xml
-
-# create an empty evaluation template for your ranking results
-python tools/evaluate.py --queries data/prefix_queries.csv --output reports/evaluation_template.csv
-
-# capture the first 20 open queries from a running search API (default http://localhost:5000/search)
-python tools/manual_sample.py --base-url http://localhost:5001 --top-k 5 --limit 20
+docker-compose up --build
 ```
 
-All store names are anonymized as `Store A…F` and product URLs/prices are fictional. Please do not add real merchant identifiers before sharing the assignment publicly.
+После успешного запуска можно проверить здоровье сервиса:
 
-## Candidate workflow
-1. Прочитайте `assignment/PREFIX_TEST_ASSIGNMENT.md`.
-2. Импортируйте каталог и запросы в выбранный вами движок поиска.
-3. Реализуйте поддержку коротких префиксов, опечаток, транслитерации и числовых атрибутов.
-4. Используйте `tools/evaluate.py` как каркас для отчёта и дополните README результатами.
-5. Упакуйте решение в Docker и пришлите ссылку на приватный репозиторий + образ.
-6. Дайте доступ на просмотр решения (репозиторий и артефакты) адресу `artem.kruglov@diginetica.com`.
+```bash
+curl http://localhost:5000/health
+```
 
-## Maintainer notes
-- Если нужно обновить статистику whitelist, положите новые выгрузки в `data/` и ссылку добавьте в README.
-- Перед публикацией убедитесь, что новые файлы не содержат PII или названий реальных магазинов.
+Ожидаемый ответ:
+```json
+{ "status": "ok" }
+```
 
-## Leaderboard
-Сводную таблицу с ручными оценками см. в [`LEADERBOARD.md`](LEADERBOARD.md). Мы фиксируем только фактическое качество (процент релевантных запросов), а автоматические метрики приводятся отдельно в отчётах кандидатов.
+## 3. Проверка качества
+
+Для оценки качества реализован скрипт tools/run_evaluation.py. Он читает CSV с запросами: data/prefix_queries.csv. Для каждого запроса вызывает GET /search с заданным top_k. Логирует количество найденных документов и время ответа.
+
+### Как запустить проверку:
+
+Из корня проекта, при работающем docker-compose up:
+
+```bash
+python .\tools\run_evaluation.py ^
+  --base-url http://localhost:5000 ^
+  --queries .\data\prefix_queries.csv ^
+  --output .\reports\eval_results.csv ^
+  --top-k 3
+```
+
+## 4. Выводы
+
+По проверке можно сказать следующее:
+- Поиск в целом работает устойчиво: 54 из 60 запросов вернули хотя бы один результат — это ~90% coverage, что для MVP на коротких и грязных префиксах выглядит достойно.
+
+
+MVP уже даёт быструю и достаточно чистую выдачу по большинству префиксов.
